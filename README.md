@@ -28,7 +28,7 @@ import 'package:q1_q2_mobile_printer/q1_q2_mobile_printer.dart';
 ```  
   
   
-### 2. Instasiasi Class `PluginSunmiV2` lalu `.bind()`  
+### 2. Instasiasi Class `Q1Q2MobilePrinter` lalu `.bind()`  
 ```dart  
  Q1Q2MobilePrinter _printer = Q1Q2MobilePrinter();  
   
