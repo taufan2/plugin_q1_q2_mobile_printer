@@ -75,8 +75,10 @@ class Q1Q2MobilePrinterPlugin: FlutterPlugin, MethodCallHandler {
         val stringColumn = call.argument<ArrayList<String>>("text_column")!!
         val columnWidth = call.argument<IntArray>("column_width")
         val columnAlignment = call.argument<IntArray>("column_alignment")
+        val isLast: Boolean = call.argument<Boolean>("is_last")!!
         val strings: Array<String?> = Utilities.arrayListToString(stringColumn)
-        this.printerCore.printColumn(strings, columnWidth, columnAlignment)
+
+        this.printerCore.printColumn(strings, columnWidth, columnAlignment, isLast)
         result.success(true)
       }
       "LINE_FEED" -> {
@@ -102,6 +104,10 @@ class Q1Q2MobilePrinterPlugin: FlutterPlugin, MethodCallHandler {
       "SEND_RAW" -> {
         val bytes = call.argument<ByteArray>("bytes")
         this.printerCore.sendRaw(bytes)
+        result.success(true)
+      }
+      "BLANK_LINE" -> {
+        this.printerCore.printBlankLine()
         result.success(true)
       }
       "COMMIT_PRINT" -> {

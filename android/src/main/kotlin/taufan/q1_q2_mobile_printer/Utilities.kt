@@ -2,6 +2,7 @@ package taufan.q1_q2_mobile_printer
 
 import android.graphics.Bitmap
 import java.util.*
+import kotlin.math.roundToInt
 
 
 object Utilities {
@@ -23,12 +24,13 @@ object Utilities {
 
     fun scaleDownBitmap(realImage: Bitmap, maxImageSize: Int,
                         filter: Boolean): Bitmap {
-        val ratio = Math.min(
-                maxImageSize / realImage.width,
-                maxImageSize / realImage.height)
-        val width = Math.round((ratio * realImage.width).toDouble())
-        val height = Math.round((ratio * realImage.height).toDouble())
-        return Bitmap.createScaledBitmap(realImage, width.toInt(),
-                height.toInt(), filter)
+
+        realImage.setHasAlpha(true)
+        val ratio: Float = (maxImageSize.toFloat() / realImage.width.toFloat()).coerceAtMost(maxImageSize.toFloat() / realImage.height.toFloat())
+        val width = (ratio * realImage.width).roundToInt()
+        val height = (ratio * realImage.height).roundToInt()
+
+        return Bitmap.createScaledBitmap(realImage, width,
+                height, filter)
     }
 }

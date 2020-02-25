@@ -1,16 +1,19 @@
 package taufan.q1_q2_mobile_printer
 
+import android.R.attr.bitmap
+import android.R.attr.opacity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.graphics.BitmapFactory
+import android.graphics.*
 import android.os.IBinder
 import android.os.RemoteException
 import android.widget.Toast
 import androidx.annotation.NonNull
 import com.iposprinter.iposprinterservice.IPosPrinterCallback
 import com.iposprinter.iposprinterservice.IPosPrinterService
+
 
 class Q1Q2Core constructor(appContext: Context) {
     var TAG: String = "Q1Q2Core"
@@ -20,12 +23,12 @@ class Q1Q2Core constructor(appContext: Context) {
     private lateinit var printerService: IPosPrinterService
 
     private val connService: ServiceConnection = object : ServiceConnection {
-        override fun onServiceDisconnected(p0: ComponentName?) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun onServiceDisconnected(component: ComponentName?) {
+            TODO("belum di implementasi") // Callback jika service connection terputus
         }
 
-        override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-            printerService = IPosPrinterService.Stub.asInterface(p1)
+        override fun onServiceConnected(component: ComponentName?, service: IBinder?) {
+            printerService = IPosPrinterService.Stub.asInterface(service)
             Toast.makeText(context, "Service Connected.", Toast.LENGTH_LONG).show()
         }
 
@@ -73,8 +76,9 @@ class Q1Q2Core constructor(appContext: Context) {
         printerService.printRawData(command, callback())
     }
 
-    fun printColumn(strings: Array<String?>, columnWidth: IntArray?, columnAlignment: IntArray?) {
-        printerService.printColumnsText(strings, columnWidth, columnAlignment, 1, callback())
+    fun printColumn(strings: Array<String?>, columnWidth: IntArray?, columnAlignment: IntArray?, isLast: Boolean) {
+        /* width column (384 / font_size(default: 24)) - (total_kolom(default: 2)+1)*/
+        printerService.printColumnsText(strings, columnWidth, columnAlignment, if (isLast) 0 else 1, callback())
     }
 
     fun lineFeed(lines: Int? = 1) {
@@ -93,11 +97,17 @@ class Q1Q2Core constructor(appContext: Context) {
     fun printImage(imagePath: String?) {
         val bmOptions = BitmapFactory.Options()
         val bitmapFactory = BitmapFactory.decodeFile(imagePath, bmOptions)
+        var bitmapCanvas = bitmapFactory.copy(Bitmap.Config.ARGB_8888, true)
 
-        val scaledBitmap = Utilities.scaleDownBitmap(bitmapFactory, 100, true)
+        var canvas: Canvas = Canvas(bitmapCanvas)
 
-        printerService.printBitmap(1, 300, scaledBitmap, callback())
-        printerService.printBlankLines(1, 10, callback())
+        canvas.drawColor(Color.WHITE)
+        canvas.drawBitmap(bitmapFactory, 0.toFloat(), 0.toFloat(), null)
+
+        val scaledBitmap = Utilities.scaleDownBitmap(bitmapCanvas, 380, true)
+
+        printerService.printBitmap(1, 12, scaledBitmap, callback())
+        printerService.printBlankLines(1, 16, callback())
     }
 
     fun sendRaw(bytes: ByteArray?) {
@@ -105,11 +115,15 @@ class Q1Q2Core constructor(appContext: Context) {
     }
 
     fun commit() {
-        printerService.printerPerformPrint(2, callback())
+        printerService.printerPerformPrint(140, callback())
     }
 
     fun start() {
         printerService.printerInit(callback())
+    }
+
+    fun printBlankLine() {
+        printerService.printBlankLines(1, 16, callback())
     }
 
     fun cancel() {

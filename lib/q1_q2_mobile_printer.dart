@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 
 class Q1Q2MobilePrinter {
-
   static const int ALIGNMENT_LEFT = 0;
   static const int ALIGNMENT_CENTER = 1;
   static const int ALIGNMENT_RIGHT = 2;
@@ -13,8 +12,7 @@ class Q1Q2MobilePrinter {
   static const String FONT_TYPE_B = "B";
   static const String FONT_TYPE_C = "C";
 
-  static const MethodChannel _channel =
-      const MethodChannel('q1_q2_mobile_printer');
+  static const MethodChannel _channel = const MethodChannel('q1_q2_mobile_printer');
 
   Future<void> bind() async {
     await _channel.invokeMethod('BIND_SERVICE');
@@ -47,12 +45,40 @@ class Q1Q2MobilePrinter {
     return;
   }
 
-  Future<void> printColumn(List<String> text, {Int32List columnWidth, Int32List columnAlignment}) async {
-    columnWidth = columnWidth ?? Int32List.fromList([1, 2]);
-    columnAlignment = columnAlignment ?? Int32List.fromList([0, 2]);
-    Map<String, dynamic> arguments = <String, dynamic>{'text_column': text, 'column_width': columnWidth, 'column_alignment': columnAlignment};
+  Future<void> printColumn(List<String> text, {Int32List columnWidth, Int32List columnAlignment, bool isLast = false}) async {
+    if (columnWidth == null) {
+      List<int> columnWidthPrepare = List<int>();
+
+      for (int _i = 0; _i < text.length; _i++) {
+        columnWidthPrepare.add(28 ~/ text.length);
+      }
+
+      columnWidth = Int32List.fromList(columnWidthPrepare);
+    }
+
+    if (columnAlignment == null) {
+      List<int> prepareColumnAlignment = List<int>();
+
+      for (int _i = 0; _i < text.length; _i++) {
+        prepareColumnAlignment.add(0);
+      }
+
+      columnAlignment = Int32List.fromList(prepareColumnAlignment);
+    }
+
+    Map<String, dynamic> arguments = <String, dynamic>{
+      'text_column': text,
+      'column_width': columnWidth,
+      'column_alignment': columnAlignment,
+      'is_last': isLast
+    };
 
     await _channel.invokeMethod("PRINT_COLUMN", arguments);
+    return;
+  }
+
+  Future<void> printBlankLine() async {
+    await _channel.invokeMethod("BLANK_LINE");
     return;
   }
 

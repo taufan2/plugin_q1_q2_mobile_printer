@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import 'package:q1_q2_mobile_printer/q1_q2_mobile_printer.dart';
@@ -24,6 +28,28 @@ class _MyAppState extends State<MyApp> {
     _printer.commit();
   }
 
+  void printColumn() async {
+    _printer.start();
+    _printer.setAlignment(position: Q1Q2MobilePrinter.ALIGNMENT_LEFT);
+    _printer.printText('Text');
+    _printer.printBlankLine();
+    _printer.printText('Text 2');
+    _printer.lineFeed();
+    _printer.printColumn(['String 1', 'String 2'], columnWidth: Int32List.fromList([15,14]));
+    _printer.printColumn(['String 1', 'String 2'], columnWidth: Int32List.fromList([14,14]), isLast: true);
+    _printer.commit();
+  }
+
+  void printImage() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+
+    print(appDocPath);
+
+    _printer.printImage("/data/data/taufan.q1_q2_mobile_printer_example/files/242b5565142705cb03cacde4601b7e0f.png");
+    _printer.commit();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -35,6 +61,8 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: <Widget>[
               RaisedButton(child: Text('Transaction Print'), onPressed: this.goPrint),
+              RaisedButton(child: Text('Print Column'), onPressed: this.printColumn),
+              RaisedButton(child: Text('Print Image'), onPressed: this.printImage),
             ],
           ),
         ),
